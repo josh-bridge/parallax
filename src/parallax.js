@@ -308,9 +308,28 @@ class Parallax {
       layer.style.top = 0
 
       let depth = helpers.data(layer, 'depth') || 0
-      this.depthsX.push(helpers.data(layer, 'depth-x') || depth)
-      this.depthsY.push(helpers.data(layer, 'depth-y') || depth)
+      this.depthsX.push({depth: helpers.data(layer, 'depth-x') || depth, layer: layer})
+      this.depthsY.push({depth: helpers.data(layer, 'depth-y') || depth, layer: layer})
     }
+  }
+
+  updateLayer(layer, depth) {
+    for (var i = 0; i < this.depthsX.length; i++) {
+      if (layer === this.depthsX[i].layer) {
+        this.depthsX[i].depth = depth || helpers.data(layer, 'depth-x');
+        this.depthsY[i].depth = depth || helpers.data(layer, 'depth-y');
+        break;
+      }
+    }
+  }
+
+  getLayerDepth(layer) {
+    for (var i = 0; i < this.depthsX.length; i++) {
+      if (layer === this.depthsX[i].layer) {
+        return this.depthsX[i].depth;
+      }
+    }
+    return 0;
   }
 
   updateDimensions() {
@@ -485,8 +504,8 @@ class Parallax {
     this.velocityY += (this.motionY - this.velocityY) * this.frictionY
     for (let index = 0; index < this.layers.length; index++) {
       let layer = this.layers[index],
-          depthX = this.depthsX[index],
-          depthY = this.depthsY[index],
+          depthX = this.depthsX[index].depth,
+          depthY = this.depthsY[index].depth,
           xOffset = this.velocityX * (depthX * (this.invertX ? -1 : 1)),
           yOffset = this.velocityY * (depthY * (this.invertY ? -1 : 1))
       this.setPosition(layer, xOffset, yOffset)
